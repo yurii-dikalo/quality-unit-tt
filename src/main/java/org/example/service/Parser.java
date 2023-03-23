@@ -9,7 +9,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.function.Predicate;
-
 import org.example.model.Data;
 import org.example.model.datatype.Query;
 import org.example.model.datatype.Record;
