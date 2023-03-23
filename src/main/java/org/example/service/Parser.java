@@ -7,7 +7,9 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.function.Predicate;
+
 import org.example.model.Data;
 import org.example.model.datatype.Query;
 import org.example.model.datatype.Record;
@@ -60,23 +62,23 @@ public class Parser {
     private List<String> generateReport() {
         List<String> report = new ArrayList<>();
         for (Query query : queries) {
-            int result = (int) records.stream()
-                    .filter(Record::isValid)
-                    .filter(record -> record.getIndex() < query.getIndex())
-                    .filter(new ServicePredicate(query.getServiceId(),
-                            query.getVariationId()))
-                    .filter(new QuestionPredicate(query.getQuestionId(),
-                            query.getCategoryId(),
-                            query.getSubCategoryId()))
-                    .filter(record -> record.getResponseType() == query.getResponseType())
-                    .filter(new DatePredicate(query.getFromDate(),
-                            query.getToDate()))
-                    .mapToInt(Record::getWaitingTime)
-                    .average().orElse(0.0);
-            if (result == 0) {
-                report.add("-");
-            } else {
+            try {
+                int result = (int) records.stream()
+                        .filter(Record::isValid)
+                        .filter(record -> record.getIndex() < query.getIndex())
+                        .filter(new ServicePredicate(query.getServiceId(),
+                                query.getVariationId()))
+                        .filter(new QuestionPredicate(query.getQuestionId(),
+                                query.getCategoryId(),
+                                query.getSubCategoryId()))
+                        .filter(record -> record.getResponseType() == query.getResponseType())
+                        .filter(new DatePredicate(query.getFromDate(),
+                                query.getToDate()))
+                        .mapToInt(Record::getWaitingTime)
+                        .average().getAsDouble();
                 report.add(String.valueOf(result));
+            } catch (NoSuchElementException e) {
+                report.add("-");
             }
         }
         return report;
